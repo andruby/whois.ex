@@ -5,6 +5,8 @@ defmodule Whois.Mixfile do
     [app: :whois,
      version: "0.0.1",
      elixir: "~> 1.2",
+     description: description,
+     package: package,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps]
@@ -28,5 +30,20 @@ defmodule Whois.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     []
+  end
+
+  defp description do
+    """
+    A Whois client in Elixir
+    """
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      maintainers: ["Andrew Fecheyr"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/andruby/whois.ex"}
+    ]
   end
 end
