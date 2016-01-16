@@ -1,35 +1,35 @@
-defmodule Whois.ServerList do
+defmodule Whois.DomainList do
   use GenServer
   require Record
 
   Record.defrecord :xmlObj, Record.extract(:xmlObj, from_lib: "xmerl/include/xmerl.hrl")
 
-  @initial_state %{servers: []}
+  @initial_state %{domains: []}
 
-  def handle_call({:server_for, domain}, _from, %{servers: servers} = state) do
-    server = Enum.max_by(servers, fn(server) ->
-      if Regex.match?(~r/\.#{server.name}$/, domain) do
-        String.length(server.name)
+  def handle_call({:domain_for, hostname}, _from, %{domains: domains} = state) do
+    domain = Enum.max_by(domains, fn(domain) ->
+      if Regex.match?(~r/\.#{domain.name}$/, hostname) do
+        String.length(domain.name)
       else
         0
       end
     end)
-    {:reply, server, state}
+    {:reply, domain, state}
   end
 
-  def handle_call({:servers}, _from, %{servers: servers} = state) do
-    {:reply, servers, state}
+  def handle_call({:domains}, _from, %{domains: domains} = state) do
+    {:reply, domains, state}
   end
 
   def start_link do
-    GenServer.start_link(__MODULE__, @initial_state, name: {:global, :whois_server_list})
+    GenServer.start_link(__MODULE__, @initial_state, name: {:global, :whois_domain_list})
   end
 
   def init(state) do
-    {:ok, %{state | servers: parse_servers}}
+    {:ok, %{state | domains: parse_domains}}
   end
 
-  defp parse_servers do
+  defp parse_domains do
     {xml, _rest} = :xmerl_scan.file("config/whois-server-list.xml")
     :xmerl_xpath.string('//domain', xml)
     |> Enum.map(&parse_domain/1)

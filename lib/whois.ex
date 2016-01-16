@@ -4,11 +4,11 @@ defmodule Whois do
     # TODO ask the server for a whois
   end
 
-  def server_for(domain) do
-    GenServer.call({:global, :whois_server_list}, {:server_for, domain})
+  def domain_for(hostname) do
+    GenServer.call({:global, :whois_domain_list}, {:domain_for, hostname})
   end
 
-  def servers do
-    GenServer.call({:global, :whois_server_list}, {:servers})
+  def domains do
+    GenServer.call({:global, :whois_domain_list}, {:domains})
   end
 end
