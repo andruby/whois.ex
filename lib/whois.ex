@@ -4,9 +4,25 @@ defmodule Whois do
 
   Record.defrecord :xmlObj, Record.extract(:xmlObj, from_lib: "xmerl/include/xmerl.hrl")
 
+  def available?(domain) do
+    server = server_for(domain)
+    # TODO ask the server for a whois
+  end
+
+  def server_for(domain) do
+    Enum.max_by(servers, fn(server) ->
+      if Regex.match?(~r/\.#{server.name}$/, domain) do
+        String.length(server.name)
+      else
+        0
+      end
+    end)
+  end
+
   def servers do
+    # TODO: Store the servers in a GenServer state
     {xml, _rest} = :xmerl_scan.file("config/whois-server-list.xml")
-    :xmerl_xpath.string('/domainList/domain', xml)
+    :xmerl_xpath.string('//domain', xml)
     |> Enum.map(&parse_domain/1)
   end
 
