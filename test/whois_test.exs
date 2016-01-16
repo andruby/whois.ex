@@ -2,9 +2,14 @@ defmodule WhoisTest do
   use ExUnit.Case
   doctest Whois
 
+  setup_all do
+    {:ok, _pid} = Whois.ServerList.start_link()
+    :ok
+  end
+
   test "servers" do
     servers = Whois.servers
-    first = List.first(servers)
+    first = servers |> List.first
     assert length(servers) == 7098
     assert first.name == "aaa"
     assert first.state == "ACTIVE"
