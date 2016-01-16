@@ -3,14 +3,9 @@ defmodule Whois do
     domain = domain_for(hostname)
     server = domain.whois_servers |> List.first
     {:ok, socket} = :gen_tcp.connect(to_char_list(server.host), 43, [:binary, active: false])
-    :ok = :gen_tcp.send(socket, "domain #{hostname}\r\n")
-    {:ok, msg} = :gen_tcp.recv(socket, 0)
-    # IO.puts(msg)
-    # IO.inspect Regex.run(~r/^.*\Q#{hostname}\E.*$/mi, msg)
-    [line_with_domain] = Regex.run(~r/^.*\Q#{hostname}\E.*$/mi, msg)
-    # IO.puts(server.available_pattern)
-    # IO.puts(line_with_domain)
-    Regex.match?(Regex.compile!(server.available_pattern, "i"), line_with_domain)
+    :ok = :gen_tcp.send(socket, "#{hostname}\r\n")
+    msg = receive_until_closed(socket)
+    Regex.match?(Regex.compile!(server.available_pattern, "i"), msg)
   end
 
   def domain_for(hostname) do
@@ -19,5 +14,13 @@ defmodule Whois do
 
   def domains do
     GenServer.call({:global, :whois_domain_list}, {:domains})
+  end
+
+  defp receive_until_closed(socket), do: receive_until_closed(socket, "")
+  defp receive_until_closed(socket, acc) do
+    case :gen_tcp.recv(socket, 0) do
+      {:ok, msg} -> receive_until_closed(socket, acc <> msg)
+      {:error, :closed} -> acc
+    end
   end
 end
