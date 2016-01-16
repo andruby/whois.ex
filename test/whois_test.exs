@@ -28,6 +28,14 @@ defmodule WhoisTest do
     assert Whois.available?("efjnwejrnfgrfsd.com")
   end
 
+  test "gent.be is unavailable" do
+    refute Whois.available?("gent.be")
+  end
+
+  test "efjnwejrnfgrfsd.be is available" do
+    assert Whois.available?("efjnwejrnfgrfsd.be")
+  end
+
   test "domain_for(jeff.co.uk) returns co.uk" do
     assert Whois.domain_for("jeff.co.uk").name == "co.uk"
   end
