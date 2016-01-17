@@ -7,6 +7,22 @@ defmodule WhoisTest do
     :ok
   end
 
+  @unavailable_hostname "good"
+  @availabale_hostname "isxkblhwrariwkqremzl"
+  @domains_to_test ~w(com net io org be co.uk de jp com.br uk ru in it fr info cn ir com.au nl eu tv me at us cc mobi is)
+
+  for domain <- @domains_to_test do
+    @unavailable "good.#{domain}"
+    @available "isxkblhwrariwkqremzl.#{domain}"
+    test @unavailable <> " is unavaiable" do
+      refute Whois.available?(@unavailable), "Should be unavailable, but is: #{@unavailable}"
+    end
+
+    test @available <> " is avaiable" do
+      assert Whois.available?(@available), "Should be available, but isnt: #{@available}"
+    end
+  end
+
   test "domains" do
     domains = Whois.domains
     first = domains |> List.first
