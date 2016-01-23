@@ -29,7 +29,9 @@ defmodule Whois.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [
+      {:poison, "2.0.0"}, # JSON read/write
+    ]
   end
 
   defp description do

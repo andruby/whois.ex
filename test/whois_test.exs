@@ -26,7 +26,7 @@ defmodule WhoisTest do
   test "domains" do
     domains = Whois.domains
     first = domains |> List.first
-    assert length(domains) == 7098
+    assert length(domains) == 1179
     assert first.name == "aaa"
     assert first.state == "ACTIVE"
   end
