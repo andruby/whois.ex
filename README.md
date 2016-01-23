@@ -19,3 +19,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
         def application do
           [applications: [:whois]]
         end
+
+## TODO
+
+* [ ] Parallelize tests for all tld's
