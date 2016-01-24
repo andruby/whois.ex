@@ -7,20 +7,43 @@ defmodule WhoisTest do
     :ok
   end
 
+  defp pmap(collection, fun) do
+    me = self
+    collection
+    |> Enum.map(fn x ->
+      spawn_link(fn ->
+        send(me, {self, fun.(x)})
+      end)
+    end)
+    |> Enum.map(fn pid ->
+      receive do
+        {^pid, result} -> result
+      end
+    end)
+  end
+
   @unavailable_hostname "good"
-  @availabale_hostname "isxkblhwrariwkqremzl"
+  @available_hostname "isxkblhwrariwkqremzl"
   @domains_to_test ~w(com net io org be co.uk de jp com.br uk ru in it fr info cn ir com.au nl eu tv me at us cc mobi is)
 
-  for domain <- @domains_to_test do
-    @unavailable "good.#{domain}"
-    @available "isxkblhwrariwkqremzl.#{domain}"
-    test @unavailable <> " is unavaiable" do
-      refute Whois.available?(@unavailable), "Should be unavailable, but is: #{@unavailable}"
-    end
+  test "the list of available domains" do
+    unavailable_domains = @domains_to_test
+    |> pmap(fn(domain) ->
+      hostname = "#{@available_hostname}.#{domain}"
+      {Whois.available?(hostname), hostname}
+    end)
+    |> Enum.filter_map(&elem(&1, 0), &elem(&1, 1))
+    assert unavailable_domains == []
+  end
 
-    test @available <> " is avaiable" do
-      assert Whois.available?(@available), "Should be available, but isnt: #{@available}"
-    end
+  test "the list of unavailable domains" do
+    available_domains = @domains_to_test
+    |> pmap(fn(domain) ->
+      hostname = "#{@unavailable_hostname}.#{domain}"
+      {Whois.available?(hostname), hostname}
+    end)
+    |> Enum.filter_map(&elem(&1, 0), &elem(&1, 1))
+    assert available_domains == []
   end
 
   test "the first domain is abbott" do
