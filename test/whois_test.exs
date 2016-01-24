@@ -23,11 +23,11 @@ defmodule WhoisTest do
     end
   end
 
-  test "domains" do
+  test "the first domain is abbott" do
     domains = Whois.domains
     first = domains |> List.first
     assert length(domains) == 1179
-    assert first.name == "aaa"
+    assert first.name == "abbott"
     assert first.state == "ACTIVE"
   end
 
