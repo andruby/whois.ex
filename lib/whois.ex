@@ -1,20 +1,34 @@
 defmodule Whois do
-  def request(hostname) do
+  # 3 retries
+  def request(hostname), do: request(hostname, 3)
+  def request(hostname, retries) do
     server = server_for(hostname)
-    {:ok, socket} = :gen_tcp.connect(to_char_list(server["host"]), 43, [:binary, active: false])
-    :ok = :gen_tcp.send(socket, "#{hostname}\r\n")
-    receive_until_closed(socket)
+    case :gen_tcp.connect(to_char_list(server["host"]), 43, [:binary, active: false], 2000) do
+      {:ok, socket} ->
+        :ok = :gen_tcp.send(socket, "#{hostname}\r\n")
+        {:ok, receive_until_closed(socket)}
+      {:error, error} ->
+        Mix.shell.info "Retrying #{hostname}"
+        case retries do
+          0 -> {:error, error}
+          _ ->
+            :timer.sleep(500)
+            request(hostname, retries-1)
+        end
+    end
   end
 
   def available?(hostname) do
     server = server_for(hostname)
-    msg = request(hostname)
-    Regex.match?(Regex.compile!(server["available_pattern"], "i"), msg)
+    case request(hostname) do
+      {:ok, msg} -> Regex.match?(Regex.compile!(server["available_pattern"], "i"), msg)
+      other -> other
+    end
   end
 
   def server_for(hostname) do
     domain = domain_for(hostname)
-    server = domain.whois_servers |> List.first
+    domain.whois_servers |> List.first
   end
 
   def domain_for(hostname) do

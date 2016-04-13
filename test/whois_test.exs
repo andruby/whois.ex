@@ -27,7 +27,8 @@ defmodule WhoisTest do
   @domains_to_test ~w(com net io org be co.uk de jp com.br uk ru in it fr info cn ir com.au nl eu tv me at us cc mobi is)
 
   test "the list of available domains" do
-    unavailable_domains = @domains_to_test
+    unavailable_domains = Whois.domains
+    |> Enum.map(fn(d) -> d.name end)
     |> pmap(fn(domain) ->
       hostname = "#{@available_hostname}.#{domain}"
       {Whois.available?(hostname), hostname}
@@ -37,7 +38,8 @@ defmodule WhoisTest do
   end
 
   test "the list of unavailable domains" do
-    available_domains = @domains_to_test
+    available_domains = Whois.domains
+    |> Enum.map(fn(d) -> d.name end)
     |> pmap(fn(domain) ->
       hostname = "#{@unavailable_hostname}.#{domain}"
       {Whois.available?(hostname), hostname}
